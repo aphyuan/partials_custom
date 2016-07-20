@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+    <script src="angular/angular.js"></script>
+    <script src="angular-route/angular-route.js"></script>
+    <script>
+      var myApp = angular.module('myApp', ['ngRoute']);
+      myApp.config(function ($routeProvider){
+        $routeProvider
+          .when('/users',{
+            templateUrl: 'partials/customizeUsers.html',
+            controller: 'CustomizeUsersController'
+          })
+          .when('/list', {
+            templateUrl: 'partials/userList.html',
+            controller: 'UserListsController'
+          })
+          .otherwise({
+            redirectTo: '/users'
+          });
+      });
+      //build the factory
+      myApp.factory('userFactory', function(){
+        var users = [{first_name:"Evelyn", last_name:"Pan", language:"c++"}];
+        var factory = {};
+        factory.getUsers = function(cb){
+          cb(users);
+        }
+        factory.addUser = function(user, cb){
+          users.push(user);
+          cb(users);
+        }
+        factory.deleteUser = function(index, cb){
+          users.splice(index, 1);
+          cb(users);
+        }
+        //show one user (not activated)
+        factory.showUser = function(index, cb){
+          cb(users[index]);
+        }
+        return factory;
+      })
+
+
+
+
+      //build the controllers
+      myApp.controller('CustomizeUsersController', function($scope, userFactory){
+        $scope.users = [];
+        userFactory.getUsers(function(data){
+          $scope.users = data;
+        })
+        $scope.submitForm = function(){
+          userFactory.addUser($scope.user, function(data){
+            $scope.users = data;
+            $scope.user = {};
+          })
+        }
+        $scope.delete = function(index){
+          userFactory.deleteUser(index, function(data){});
+        }
+      });
+      myApp.controller('UserListsController', function($scope, userFactory){
+        $scope.users = [];
+        userFactory.getUsers(function(data){
+          $scope.users = data;
+        })
+      });
+
+    </script>
+  </head>
+  <body>
+    <div ng-app='myApp'>
+      <a href="#/users">Customize Users</a>  ::  <a href="#/list">User List</a>
+      <div ng-view="">
+      </div>
+    </div>
+  </body>
+</html>
